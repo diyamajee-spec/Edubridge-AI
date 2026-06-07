@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { store, hashPassword, makeToken } from '@/lib/store';
+import { store, verifyPassword, makeToken } from '@/lib/store';
 
 export async function POST(request: Request) {
   try {
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     }
 
     const user = store.users.get(email);
-    if (!user || user.hashedPassword !== hashPassword(password)) {
+    if (!user || !verifyPassword(password, user.hashedPassword)) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 

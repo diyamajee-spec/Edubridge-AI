@@ -66,7 +66,31 @@ if (!globalThis.__EDUBRIDGE_STORE__) {
 export const store = globalThis.__EDUBRIDGE_STORE__!;
 
 export function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password + 'edubridge_salt_2025').digest('hex');
+  const salt = crypto.randomBytes(16).toString('hex');
+  const N = 16384;
+  const r = 8;
+  const p = 1;
+  const keyLen = 64;
+  const derivedKey = crypto.scryptSync(password, salt, keyLen, { N, r, p }).toString('hex');
+  return `scrypt$${N}$${r}$${p}$${salt}$${derivedKey}`;
+}
+
+export function verifyPassword(password: string, storedHash: string): boolean {
+  try {
+    const parts = storedHash.split('$');
+    if (parts.length !== 6 || parts[0] !== 'scrypt') return false;
+
+    const N = Number(parts[1]);
+    const r = Number(parts[2]);
+    const p = Number(parts[3]);
+    const salt = parts[4];
+    const expected = Buffer.from(parts[5], 'hex');
+
+    const actual = crypto.scryptSync(password, salt, expected.length, { N, r, p });
+    return crypto.timingSafeEqual(actual, expected);
+  } catch {
+    return false;
+  }
 }
 
 export function makeToken(email: string, userId: string): string {
