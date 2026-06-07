@@ -29,11 +29,11 @@ def test_auth_flow():
         
     print("Registration successful.")
     reg_data = r_reg.json()
-    print("User returned from register:", json.dumps(reg_data.get("user"), indent=2))
+    print("Register response includes user object:", reg_data.get("user") is not None)
     
     print("\n--- Simulating Logout (Discarding tokens) ---")
     
-    print(f"\n--- Scenario B: Login with same credentials {trimmed_email} ---")
+    print("\n--- Scenario B: Login with same credentials ---")
     login_payload = {
         "email": trimmed_email,
         "password": test_password
@@ -47,7 +47,7 @@ def test_auth_flow():
         
     print("Login successful.")
     log_data = r_log.json()
-    print("User returned from login:", json.dumps(log_data.get("user"), indent=2))
+    print("Login response includes user object:", log_data.get("user") is not None)
     
 if __name__ == "__main__":
     test_auth_flow()
